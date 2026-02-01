@@ -72,7 +72,12 @@ const samples = [
   // Add tricky cases
   'assets/floors/floor-1/FunctionalEquipmentCYC7CGX1.jpg',
   'assets/floors/floor-1/functionalEquipmentCYc7CGX1.png',
-  'assets/floors/floor-1/benchpress_v2_202301.jpg'
+  'assets/floors/floor-1/benchpress_v2_202301.jpg',
+  // Production-like hashed filenames
+  'assets/floors/floor-3/pulley-DpraOCzz.jpeg',
+  'assets/floors/floor-3/seated_leg_press-YxnvYiEa.jpeg',
+  'assets/floors/floor4/functional-equipment-CYc7CGX1.jpeg',
+  'assets/floors/ground/Reception_-DLb7tJAl.jpg'
 ];
 
 for (const s of samples) {
