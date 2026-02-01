@@ -67,14 +67,33 @@ const useFloorImages = (floorId: string) => {
 
 const getMachineLabel = (src: string) => {
   const file = src.split("/").pop() || "";
-  return file
-    .replace(/\.[^.]+$/, "") // Remove file extension
-    .replace(/\s+[A-Z0-9]+[a-z]*[A-Z0-9]+[a-zA-Z0-9]*(\s+[A-Z][a-z]{1,2})?$/g, "") // Remove hash patterns
-    .replace(/[-_]+/g, " ") // Replace hyphens and underscores with spaces
-    .replace(/\s+/g, " ") // Normalize multiple spaces to single space
-    .trim() // Trim whitespace
-    .replace(/\b\w/g, (c) => c.toUpperCase()) // Capitalize first letter of each word
-    || "Machine";
+  // base name without extension
+  let name = file.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
+
+  // Determine if a token looks like junk (hash-like or id-like)
+  const isJunk = (t: string) => {
+    const s = t.replace(/[^A-Za-z0-9]/g, "");
+    if (s.length < 3) return false; // keep short words
+    // Mixed alphanumeric tokens (e.g. CYC7CGX1, AB12CD3) are junk when reasonably long
+    if (/[A-Za-z]/.test(s) && /\d/.test(s) && s.length >= 4) return true;
+    // Long numeric sequences like 12345
+    if (/^[0-9]{3,}$/.test(s)) return true;
+    // Short uppercase abbreviations (1-2 chars) likely non-descriptive IDs
+    if (/^[A-Z]{1,2}$/.test(s)) return true;
+    return false;
+  };
+
+  const tokens = name.split(/\s+/);
+  let cleaned = tokens.slice();
+  while (cleaned.length > 1 && isJunk(cleaned[cleaned.length - 1])) {
+    cleaned.pop();
+  }
+
+  const out = cleaned.join(" ").replace(/\s+/g, " ").trim();
+  if (!out) return "Machine";
+  // If the remaining label is purely numeric, fallback to a generic label
+  if (/^[0-9]+$/.test(out)) return "Machine";
+  return out.replace(/\b\w/g, (c) => c.toUpperCase());
 };
 
 const FloorPage = () => {
