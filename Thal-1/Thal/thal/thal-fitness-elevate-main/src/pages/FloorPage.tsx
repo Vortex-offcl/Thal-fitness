@@ -68,28 +68,64 @@ const useFloorImages = (floorId: string) => {
 const getMachineLabel = (src: string) => {
   const file = src.split("/").pop() || "";
   // base name without extension
-  let name = file.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
+  let name = file.replace(/\.[^.]+$/, "");
+
+  // Try to split camelCase and separate letters/digits (e.g. FunctionalEquipment -> Functional Equipment, Treadmill123 -> Treadmill 123)
+  name = name.replace(/([a-z0-9])([A-Z]+)/g, "$1 $2");
+  name = name.replace(/([A-Za-z])([0-9])/g, "$1 $2");
+  name = name.replace(/([0-9])([A-Za-z])/g, "$1 $2");
+  // Normalize separators
+  name = name.replace(/[-_]+/g, " ").trim();
 
   // Determine if a token looks like junk (hash-like or id-like)
   const isJunk = (t: string) => {
     const s = t.replace(/[^A-Za-z0-9]/g, "");
-    if (s.length < 3) return false; // keep short words
+    if (s.length === 0) return true;
+    if (/^[0-9]+$/.test(s)) return true; // any numeric token is junk
+    // Single character tokens are likely non-descriptive
+    if (s.length === 1) return true;
+    // Short uppercase tokens (1-3 chars) like IMG, CY likely non-descriptive IDs
+    if (/^[A-Z]{1,3}$/.test(s)) return true;
     // Mixed alphanumeric tokens (e.g. CYC7CGX1, AB12CD3) are junk when reasonably long
     if (/[A-Za-z]/.test(s) && /\d/.test(s) && s.length >= 4) return true;
+    // Mixed-case tokens with multiple uppercase letters but containing lowercase/digits are suspicious
+    if (/[A-Z].*[A-Z]/.test(s) && /[a-z0-9]/.test(s) && s.length >= 3) return true;
     // Long numeric sequences like 12345
     if (/^[0-9]{3,}$/.test(s)) return true;
-    // Short uppercase abbreviations (1-2 chars) likely non-descriptive IDs
-    if (/^[A-Z]{1,2}$/.test(s)) return true;
+    if (s.length < 3) return false; // keep small lowercase words like 'kg', 'xl'
     return false;
   };
 
-  const tokens = name.split(/\s+/);
-  let cleaned = tokens.slice();
-  while (cleaned.length > 1 && isJunk(cleaned[cleaned.length - 1])) {
-    cleaned.pop();
+  // Strip trailing attached junk fragments like 'NameCYC7CGX1' or 'name-12345'
+  let prev;
+  do {
+    prev = name;
+    const m = name.match(/(?:\s|-|_)?([A-Za-z0-9]{3,})$/);
+    if (m && isJunk(m[1])) {
+      name = name.slice(0, m.index).trim();
+    }
+  } while (name !== prev && name.length > 0);
+
+  // Split into tokens and remove trailing groups that together look like junk (e.g. 'CYC 7 CGX 1')
+  let tokens = name.split(/\s+/).filter(Boolean);
+  let removed = true;
+  while (removed && tokens.length > 1) {
+    removed = false;
+    for (let take = 1; take <= Math.min(5, tokens.length); take++) {
+      const tail = tokens.slice(tokens.length - take).join("");
+      // Only strip joined tails when they contain digits or are UPPERCASE-like hashes
+      if (isJunk(tail) && (/[0-9]/.test(tail) || /^[A-Z0-9]+$/.test(tail))) {
+        tokens.splice(tokens.length - take, take);
+        removed = true;
+        break;
+      }
+    }
   }
 
-  const out = cleaned.join(" ").replace(/\s+/g, " ").trim();
+  // Filter out any remaining junk tokens anywhere in the name
+  tokens = tokens.filter((t) => !isJunk(t));
+
+  const out = tokens.join(" ").replace(/\s+/g, " ").trim();
   if (!out) return "Machine";
   // If the remaining label is purely numeric, fallback to a generic label
   if (/^[0-9]+$/.test(out)) return "Machine";
