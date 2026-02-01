@@ -1,0 +1,232 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Dark premium gym theme locked to black / white / brown */
+    --background: 0 0% 2%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 6%;
+    --popover-foreground: 0 0% 98%;
+
+    /* Brown accent drawn from the THAL logo */
+    --primary: 30 42% 38%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 8%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 0 0% 14%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 30 42% 38%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 65% 48%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 16%;
+    --input: 0 0% 16%;
+    --ring: 30 42% 38%;
+
+    --radius: 0.5rem;
+
+    /* Custom colors reused across effects */
+    --gold: 30 42% 38%;
+    --gold-light: 30 42% 48%;
+    --gold-dark: 30 42% 28%;
+    --charcoal: 0 0% 10%;
+    --charcoal-light: 0 0% 14%;
+
+    /* Glassmorphism */
+    --glass-bg: 0 0% 100% / 0.04;
+    --glass-border: 0 0% 100% / 0.08;
+
+    /* Typography */
+    --font-heading: 'Oswald', sans-serif;
+    --font-body: 'Inter', sans-serif;
+
+    /* Shadows */
+    --shadow-glow: 0 0 40px hsl(30 42% 38% / 0.35);
+    --shadow-soft: 0 10px 40px hsl(0 0% 0% / 0.55);
+
+    /* Sidebar */
+    --sidebar-background: 0 0% 6%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 30 42% 38%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 0 0% 14%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 16%;
+    --sidebar-ring: 30 42% 38%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-body);
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    @apply font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Glass card effect */
+  .glass-card {
+    @apply backdrop-blur-xl border rounded-lg;
+    background: hsl(var(--glass-bg));
+    border-color: hsl(var(--glass-border));
+  }
+
+  /* Hero text glow */
+  .text-glow {
+    text-shadow: 0 0 60px hsl(var(--gold) / 0.5),
+                 0 0 100px hsl(var(--gold) / 0.3);
+  }
+
+  .text-glow-subtle {
+    text-shadow: 0 0 40px hsl(var(--gold) / 0.3);
+  }
+
+  /* Gradient overlays */
+  .overlay-dark {
+    background: linear-gradient(
+      to bottom,
+      hsl(0 0% 0% / 0.7),
+      hsl(0 0% 0% / 0.5),
+      hsl(0 0% 0% / 0.8)
+    );
+  }
+
+  .overlay-hero {
+    background: linear-gradient(
+      135deg,
+      hsl(0 0% 0% / 0.8) 0%,
+      hsl(0 0% 0% / 0.4) 50%,
+      hsl(0 0% 0% / 0.7) 100%
+    );
+  }
+
+  /* Button variants */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-8 py-4 text-lg font-semibold transition-all duration-300;
+    @apply bg-primary text-primary-foreground rounded-sm;
+    font-family: var(--font-heading);
+    letter-spacing: 0.1em;
+  }
+
+  .btn-primary:hover {
+    @apply scale-105;
+    box-shadow: var(--shadow-glow);
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center px-8 py-4 text-lg font-semibold transition-all duration-300;
+    @apply bg-transparent border-2 border-foreground text-foreground rounded-sm;
+    font-family: var(--font-heading);
+    letter-spacing: 0.1em;
+  }
+
+  .btn-outline:hover {
+    @apply bg-foreground text-background scale-105;
+  }
+
+  /* Section padding */
+  .section-padding {
+    @apply py-20 md:py-32;
+  }
+
+  /* Scroll indicator */
+  .scroll-indicator {
+    @apply w-6 h-10 border-2 border-foreground/50 rounded-full flex justify-center;
+  }
+
+  .scroll-indicator::before {
+    content: '';
+    @apply w-1.5 h-3 bg-primary rounded-full mt-2;
+    animation: scroll-bounce 2s infinite;
+  }
+
+  /* Floor card */
+  .floor-card {
+    @apply glass-card p-6 transition-all duration-500 cursor-pointer relative overflow-hidden;
+  }
+
+  .floor-card::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-500;
+    background: linear-gradient(
+      135deg,
+      hsl(var(--gold) / 0.1),
+      transparent
+    );
+  }
+
+  .floor-card:hover::before {
+    @apply opacity-100;
+  }
+
+  .floor-card:hover {
+    @apply border-primary/50 scale-[1.02];
+    box-shadow: var(--shadow-glow);
+  }
+}
+
+@layer utilities {
+  .font-heading {
+    font-family: var(--font-heading);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+}
+
+/* Animations */
+@keyframes scroll-bounce {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: translateY(8px);
+    opacity: 0.5;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px hsl(38 92% 50% / 0.3);
+  }
+  50% {
+    box-shadow: 0 0 40px hsl(38 92% 50% / 0.6);
+  }
+}
