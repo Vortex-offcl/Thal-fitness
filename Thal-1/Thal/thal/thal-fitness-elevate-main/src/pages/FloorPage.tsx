@@ -42,15 +42,22 @@ const floorImageGlobs: Record<string, Record<string, { default: string } | strin
 
 const useFloorImages = (floorId: string) => {
   const modules = floorImageGlobs[floorId] ?? {};
-  let imgs = Object.values(modules).map((mod) => (typeof mod === "string" ? mod : mod.default));
+  // Return objects containing both the served src (hashed in production)
+  // and the original filename (from the import key) so labels derive from
+  // the original filename, not the hashed asset name.
+  let imgs = Object.entries(modules).map(([key, mod]) => {
+    const src = typeof mod === "string" ? mod : mod.default;
+    const file = (key.split("/").pop() || "").replace(/\.[^.]+$/, "");
+    return { src, file };
+  });
 
   // For ground floor: remove cafe/lobby/locker placeholders and prefer swimming/steam images first
   if (floorId === "ground") {
     // remove cafe/lobby/locker placeholders from ground floor images, keep reception
-    imgs = imgs.filter((src) => !/(cafe|lobby|locker)/i.test(src));
+    imgs = imgs.filter(({ src }) => !/(cafe|lobby|locker)/i.test(src));
     imgs.sort((a, b) => {
-      const sa = a.toLowerCase();
-      const sb = b.toLowerCase();
+      const sa = a.src.toLowerCase();
+      const sb = b.src.toLowerCase();
       const score = (s: string) => (s.includes("swimming") ? 0 : s.includes("steam") ? 1 : 2);
       const diff = score(sa) - score(sb);
       return diff !== 0 ? diff : sa.localeCompare(sb);
@@ -59,7 +66,7 @@ const useFloorImages = (floorId: string) => {
 
   // For floor 4 (the top/recovery floor) hide SVG placeholders and show only real photos
   if (floorId === "4") {
-    imgs = imgs.filter((src) => !src.toLowerCase().endsWith(".svg"));
+    imgs = imgs.filter(({ src }) => !src.toLowerCase().endsWith(".svg"));
   }
 
   return imgs;
@@ -69,6 +76,14 @@ const getMachineLabel = (src: string) => {
   const file = src.split("/").pop() || "";
   // base name without extension
   let name = file.replace(/\.[^.]+$/, "");
+
+  // Trim common bundler hashes and version/timestamp suffixes which get appended
+  // to filenames during the build (e.g. '-YxnvYiEa' or '_v2_202301'). This ensures
+  // labels are derived from the original human-friendly filename.
+  name = name.replace(/-[A-Za-z0-9]{6,}$/g, ""); // trailing -HASH
+  name = name.replace(/_v?\d{2,}(_\d+)?$/i, ""); // _v2, _202301, _v2_202301
+  name = name.replace(/_\d{6,}$/g, ""); // _202301
+  name = name.replace(/[-_]+$/g, ""); // trim trailing separators
 
   // Try to split camelCase and separate letters/digits (e.g. FunctionalEquipment -> Functional Equipment, Treadmill123 -> Treadmill 123)
   name = name.replace(/([a-z0-9])([A-Z]+)/g, "$1 $2");
@@ -207,18 +222,18 @@ const FloorPage = () => {
               </div>
             </div>
           ) : (
-            images.map((src) => (
+            images.map(({ src, file }) => (
               <figure key={src} className="relative overflow-hidden rounded-lg border border-border/60 bg-secondary/60">
                 <div className="group block h-64 w-full overflow-hidden">
                   <img
                     src={src}
-                    alt={getMachineLabel(src)}
+                    alt={getMachineLabel(file || src)}
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 </div>
                 <figcaption className="flex items-center justify-between px-4 py-3">
-                  <span className="font-heading text-sm tracking-widest text-foreground">{getMachineLabel(src)}</span>
+                  <span className="font-heading text-sm tracking-widest text-foreground">{getMachineLabel(file || src)}</span>
                   <span className="text-[10px] font-heading tracking-[0.2em] text-primary">FLOOR {floorKey}</span>
                 </figcaption>
               </figure>
