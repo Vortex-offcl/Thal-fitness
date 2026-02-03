@@ -21,7 +21,7 @@ const navLinks: Array<{ name: string; href?: string; children?: { name: string; 
   { name: "Contact", href: "#contact" },
 ];
 
-const enquiryHref = "https://wa.me/919962810484";
+const enquiryHref = "https://wa.me/919800976976";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);

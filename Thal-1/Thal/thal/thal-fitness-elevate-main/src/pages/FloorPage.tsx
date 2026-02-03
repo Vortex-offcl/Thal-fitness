@@ -16,19 +16,19 @@ const floorMeta: Record<string, { title: string; intro: string; highlights: stri
     highlights: ["Bench & incline presses", "Cable cross stations", "Dumbbell zone", "Shoulder isolations"],
   },
   "3": {
-    title: "Floor 3 — Legs & Back",
+    title: "Floor 3 — Leg & Back Training",
     intro: "Heavy-duty lower body and back training with platforms, racks, and pulldown rigs.",
     highlights: ["Squat racks", "Deadlift platforms", "Leg press & curls", "Lat pulldown rigs"],
   },
   "4": {
-    title: "Floor 4 — Recovery & Training",
-    intro: "Dedicated recovery and training spaces including therapy, studios and light conditioning.",
-    highlights: ["Recovery Rooms", "Therapy Pools", "Training Studios", "Mobility Zones"],
+    title: "Floor 4 — CrossFit & Recovery",
+    intro: "CrossFit rigs and recovery spaces including therapy pools, mobility zones and training studios.",
+    highlights: ["CrossFit Stations", "Training Studios", "Recovery Rooms", "Therapy Pools"],
   },
   "ground": {
     title: "Ground Floor — Entrance & Amenities",
     intro: "Swimming pool and communal spaces for members and guests.",
-    highlights: ["Swimming Pool","cafe"],
+    highlights: ["Swimming","Swimming Pool","Cafe"],
   },
 };
 
